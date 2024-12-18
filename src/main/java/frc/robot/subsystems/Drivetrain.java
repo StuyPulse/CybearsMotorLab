@@ -30,7 +30,6 @@ public class Drivetrain extends SubsystemBase {
 
 
   /** Creates a new ExampleSubsystem. */
-  @SuppressWarnings("removal")
 
   public Drivetrain() {
     // leftMotors = new PWM[] {
@@ -67,6 +66,14 @@ public class Drivetrain extends SubsystemBase {
 
     
     odometry = new DifferentialDriveOdometry(getRotation2d()    );
+
+    /*
+    TODO: Finish doing weird new stuff with MotorControllers
+    odometry (initialize a gyro pls)
+    also figure out how to do the blanks thing (how much are we gonna make them code?
+    aren't they basically just gonna be copying the code in the slides?)
+    */
+  
 
   }
 
