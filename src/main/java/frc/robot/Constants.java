@@ -27,6 +27,10 @@ public final class Constants {
     public static int RIGHT_B = 3;
 
   }
+
+  public static class Drivetrain {
+    public static int DISTANCE_PER_PULSE = 256; //Change
+  }
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }

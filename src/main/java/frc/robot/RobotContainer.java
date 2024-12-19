@@ -43,8 +43,8 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_Drivetrain::exampleCondition)
-        .onTrue(new ExampleCommand(m_Drivetrain));
+    //new Trigger(m_Drivetrain::exampleCondition)
+    //    .onTrue(new ExampleCommand(m_Drivetrain));
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
@@ -56,8 +56,9 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
+  
+  //public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Autos.exampleAuto(m_Drivetrain);
-  }
+    // return Autos.exampleAuto(m_Drivetrain);
+  //}
 }
