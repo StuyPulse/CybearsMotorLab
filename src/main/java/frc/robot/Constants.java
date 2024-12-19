@@ -15,11 +15,9 @@ package frc.robot;
 public final class Constants {
   public static class Ports {
     public static int LEFT_TOP = 0;
-    public static int LEFT_MIDDLE = 0;
     public static int LEFT_BOTTOM = 0;
 
     public static int RIGHT_TOP = 0;
-    public static int RIGHT_MIDDLE = 0;
     public static int RIGHT_BOTTOM = 0;
 
     public static int LEFT_A = 0;

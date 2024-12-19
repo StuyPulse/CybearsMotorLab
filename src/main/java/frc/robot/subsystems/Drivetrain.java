@@ -6,12 +6,11 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.Odometry;
+import edu.wpi.first.units.Angle;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
-import edu.wpi.first.wpilibj.motorcontrol.PWMMotorController;
+import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -21,10 +20,12 @@ import frc.robot.Constants;
 
 public class Drivetrain extends SubsystemBase {
 
-  private final PWMMotorController leftMotors;
-  private final PWMMotorController rightMotors;
+  private final PWMSparkMax[] leftMotors;
+  private final PWMSparkMax[] rightMotors;
+
   private final Encoder left;
   private final Encoder right;
+
   private final DifferentialDrive driveTrain;
   private final DifferentialDriveOdometry odometry;
 
@@ -32,57 +33,34 @@ public class Drivetrain extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
 
   public Drivetrain() {
-    // leftMotors = new PWM[] {
-    //   new PWM(Constants.Ports.LEFT_TOP),
-    //   new PWM(Constants.Ports.LEFT_MIDDLE),
-    //   new PWM(Constants.Ports.LEFT_BOTTOM)
-    // };
 
-    // rightMotors = new PWM[] {
-    //   new PWM(Constants.Ports.RIGHT_TOP),
-    //   new PWM(Constants.Ports.RIGHT_MIDDLE),
-    //   new PWM(Constants.Ports.RIGHT_BOTTOM)
-    // };
+    leftMotors = new PWMSparkMax[] {
+      new PWMSparkMax(Constants.Ports.LEFT_TOP),
+      new PWMSparkMax(Constants.Ports.LEFT_BOTTOM)
+    };
+
+    rightMotors = new PWMSparkMax[] {
+      new PWMSparkMax(Constants.Ports.RIGHT_TOP),
+      new PWMSparkMax(Constants.Ports.RIGHT_BOTTOM)
+    };
+
+    //Add thing to inverse one side
 
     left = new Encoder(Constants.Ports.LEFT_A, Constants.Ports.LEFT_B);
     right = new Encoder(Constants.Ports.RIGHT_A, Constants.Ports.RIGHT_B);
 
-    PWMMotorController leftTopController = new PWMMotorController("left top", Constants.Ports.LEFT_TOP) {};
-    PWMMotorController leftMiddleController = new PWMMotorController("left middle", Constants.Ports.LEFT_MIDDLE) {};
-    PWMMotorController leftBottomController = new PWMMotorController("left bottom", Constants.Ports.LEFT_BOTTOM) {};
-
-    PWMMotorController rightTopController = new PWMMotorController("right top", Constants.Ports.RIGHT_TOP) {};
-    PWMMotorController rightMiddleController = new PWMMotorController("right middle", Constants.Ports.RIGHT_MIDDLE) {};
-    PWMMotorController rightBottomController = new PWMMotorController("right bottom", Constants.Ports.RIGHT_BOTTOM) {};
-
-
-    leftMiddleController.addFollower(leftBottomController);
-    leftTopController.addFollower(leftMiddleController);
-
-    rightMiddleController.addFollower(rightBottomController);
-    rightTopController.addFollower(rightMiddleController);
-
-    driveTrain = new DifferentialDrive(leftTopController, leftMiddleController);
+    
+    leftMotors[0].addFollower(leftMotors[1]);
+    rightMotors[0].addFollower(rightMotors[1]);
 
     
-    odometry = new DifferentialDriveOdometry(getRotation2d()    );
+    driveTrain = new DifferentialDrive(leftMotors[0], rightMotors[0]);
 
-    /*
-    TODO: Finish doing weird new stuff with MotorControllers
-    odometry (initialize a gyro pls)
-    also figure out how to do the blanks thing (how much are we gonna make them code?
-    aren't they basically just gonna be copying the code in the slides?)
-    */
+
+    odometry = new DifferentialDriveOdometry(, null, null);
   
 
   }
-
-    
-
-
-    
-
-
 
   /**
    * Example command factory method.
