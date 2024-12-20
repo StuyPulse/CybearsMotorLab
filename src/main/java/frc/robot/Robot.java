@@ -20,9 +20,6 @@ public class Robot extends TimedRobot {
 
   private RobotContainer m_robotContainer;
 
-  //private Joystick joystick = new Joystick(0);
-  private final Drivetrain drivetrain = new Drivetrain();
-  
 
   
 
