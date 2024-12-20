@@ -29,15 +29,12 @@ public final class Constants {
   }
 
   public static class Drivetrain {
-    public static int DISTANCE_PER_PULSE = 256; //Change
+    public static int DISTANCE_PER_PULSE = 256;
     public static double GEAR_RATIO = 3.0;
     public static double MASS = 50.0;
     public static double WHEEL_RADIUS = 0.75;
-    public static double INERTIA = 2; // change
+    public static double INERTIA = 2;
 
-  }
-  public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
   }
 
 }

@@ -1,23 +1,8 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
-
-/* TODO: 
- * Add Field2d related stuff
- * Check if we have all needed methods
- * Motor Config?
- * Drive Commands?
- */
-
-
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
-import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.Angle;
 import edu.wpi.first.wpilibj.ADIS16448_IMU;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -28,30 +13,26 @@ import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants;
 
 
 public class Drivetrain extends SubsystemBase {
 
+  //Declare fields for rightMotors and rightEncoder underneath
   private final PWMSparkMax[] leftMotors;
-  private final PWMSparkMax[] rightMotors;
 
   private final Encoder leftEncoder;
-  private final Encoder rightEncoder;
 
   private final DifferentialDrive driveTrain;
-
   private final ADIS16448_IMU gyro;
   private final DifferentialDriveOdometry odometry;
+
   private final Field2d field;
   private final FieldObject2d robotPose;
-
   private final DifferentialDrivetrainSim driveTrainSim;
   private final EncoderSim leftEncoderSim;
   private final EncoderSim rightEncoderSim;
@@ -61,34 +42,30 @@ public class Drivetrain extends SubsystemBase {
 
   public Drivetrain() {
 
+    // Instantiate rightMotors
     leftMotors = new PWMSparkMax[] {
       new PWMSparkMax(Constants.Ports.LEFT_TOP),
       new PWMSparkMax(Constants.Ports.LEFT_BOTTOM)
     };
 
-    rightMotors = new PWMSparkMax[] {
-      new PWMSparkMax(Constants.Ports.RIGHT_TOP),
-      new PWMSparkMax(Constants.Ports.RIGHT_BOTTOM)
-    };
+    // Uncomment the code below when rightMotors is coded
+    // rightMotors[0].setInverted(true);
+    // rightMotors[1].setInverted(true);
 
-    rightMotors[0].setInverted(true);
-    rightMotors[1].setInverted(true);
-
+    // Instantiate rightEncoder
     leftEncoder = new Encoder(Constants.Ports.LEFT_A, Constants.Ports.LEFT_B);
-    rightEncoder = new Encoder(Constants.Ports.RIGHT_A, Constants.Ports.RIGHT_B);
-    
-    leftMotors[0].addFollower(leftMotors[1]);
-    rightMotors[0].addFollower(rightMotors[1]);
-
-    joystick = new Joystick(0);
-
-    driveTrain = new DifferentialDrive(leftMotors[0], rightMotors[0]);
+    // setDistancePerPulse for rightEncoder
     leftEncoder.setDistancePerPulse(Constants.Drivetrain.DISTANCE_PER_PULSE);
-    rightEncoder.setDistancePerPulse(Constants.Drivetrain.DISTANCE_PER_PULSE);
+    
+    //addFollower for rightMotors
+    leftMotors[0].addFollower(leftMotors[1]);
 
+    // Uncomment this code below when rightMotors is instantiated
+    // DriveTrain = new DifferentialDrive(leftMotors[0], rightMotors[0]);
+
+    // Code for simulation, you can ignore if you want
     gyro = new ADIS16448_IMU();
-    odometry = new DifferentialDriveOdometry(getRotation2d(), getLeftDistance(), getRightDistance()); //Idk if this is right
-
+    odometry = new DifferentialDriveOdometry(getRotation2d(), getLeftDistance(), getRightDistance()); 
     field = new Field2d();
     SmartDashboard.putData("Field", field);
     robotPose = field.getObject("Robot Pose");
@@ -105,32 +82,30 @@ public class Drivetrain extends SubsystemBase {
     leftEncoderSim = new EncoderSim(leftEncoder);
     rightEncoderSim = new EncoderSim(rightEncoder);
     gyroSim = new ADIS16448_IMUSim(gyro);
+
+    joystick = new Joystick(0);
   }
 
   public void arcadeDrive(double fwd, double rot) {
-    driveTrain.arcadeDrive(fwd, rot);
+    // Fill in with one line, search WPILib Documentation for a method in DifferentialDrive that completes the task
   }
 
-  //Encoder
+  //Encoders
   public double getLeftDistance() {
-    return leftEncoder.getDistance();
+    // Fill in with one line, Encoder has a method getDistance()
   }
 
-  public double getRightDistance() {
-    return rightEncoder.getDistance();
-  }
+  // Code getRightDistance()
 
   public double getDistance() {
-    return (getLeftDistance() + getRightDistance()) / 2.0;
+    // Find the average of the left and right measurements from the two encoders
   }
 
   public double getLeftVelocity() {
     return leftEncoder.getRate();
    }
 
-  public double getRightVelocity() {
-    return rightEncoder.getRate();
-  }
+  // Code getRightVelocity()
 
   public double getVelocity() {
     return (getLeftVelocity() + getRightVelocity()) / 2.0;
@@ -191,8 +166,8 @@ public class Drivetrain extends SubsystemBase {
           -joystickY,
           -joystickY 
         );
-    }
-    
+
+      }
 
     robotPose.setPose(driveTrainSim.getPose());
     field.setRobotPose(driveTrainSim.getPose());

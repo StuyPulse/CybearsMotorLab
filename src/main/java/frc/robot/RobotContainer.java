@@ -5,11 +5,7 @@
 
 package frc.robot;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.XboxController.Button;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-
 import frc.robot.subsystems.Drivetrain;
 
 
@@ -20,21 +16,17 @@ import frc.robot.subsystems.Drivetrain;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  private final Drivetrain m_robotDrive = new Drivetrain();
+  // Initialize the Drivetrain with the name m_robotDrive
 
-  // The driver's controller
-  XboxController driverController =
-      new XboxController(0);
+  // Create a new XboxController with the name driverController and a port of 1
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
 
-    // Configure default commands
     // Set the default drive command to split-stick arcade drive
     m_robotDrive.setDefaultCommand(
-       
         new RunCommand(
             () ->
                 m_robotDrive.arcadeDrive(
@@ -42,12 +34,7 @@ public class RobotContainer {
             m_robotDrive));
   }
 
-  
-  private void configureButtonBindings() {
-  }
-
-  public Drivetrain getRobotDrive() {
-    return m_robotDrive;
-  }
+  // No buttons to bind
+  private void configureButtonBindings() {}
 
 }
