@@ -14,17 +14,17 @@ package frc.robot;
  */
 public final class Constants {
   public static class Ports {
-    public static int LEFT_TOP = 4;
-    public static int LEFT_BOTTOM = 5;
+    public static int LEFT_TOP = 0;
+    public static int LEFT_BOTTOM = 1;
 
-    public static int RIGHT_TOP = 6;
-    public static int RIGHT_BOTTOM = 7;
+    public static int RIGHT_TOP = 2;
+    public static int RIGHT_BOTTOM = 3;
 
-    public static int LEFT_A = 0;
-    public static int LEFT_B = 1;
+    public static int LEFT_A = 4;
+    public static int LEFT_B = 5;
 
-    public static int RIGHT_A = 2;
-    public static int RIGHT_B = 3;
+    public static int RIGHT_A = 6;
+    public static int RIGHT_B = 7;
 
   }
 

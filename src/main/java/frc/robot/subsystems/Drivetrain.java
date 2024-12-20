@@ -15,11 +15,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.Odometry;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N2;
-import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.wpilibj.ADIS16448_IMU;
@@ -29,8 +25,8 @@ import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj.simulation.ADIS16448_IMUSim;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.simulation.EncoderSim;
-import edu.wpi.first.wpilibj.simulation.LinearSystemSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -54,13 +50,13 @@ public class Drivetrain extends SubsystemBase {
   private final ADIS16448_IMU gyro;
   private final DifferentialDriveOdometry odometry;
   private final Field2d field;
+  private final FieldObject2d robotPose;
 
   private final DifferentialDrivetrainSim driveTrainSim;
   private final EncoderSim leftEncoderSim;
   private final EncoderSim rightEncoderSim;
   private final ADIS16448_IMUSim gyroSim;
   
-
   private final Joystick joystick;
 
   public Drivetrain() {
@@ -94,6 +90,8 @@ public class Drivetrain extends SubsystemBase {
     odometry = new DifferentialDriveOdometry(getRotation2d(), getLeftDistance(), getRightDistance()); //Idk if this is right
 
     field = new Field2d();
+    SmartDashboard.putData("Field", field);
+    robotPose = field.getObject("Robot Pose");
 
     driveTrainSim = new DifferentialDrivetrainSim(
       DCMotor.getNEO(2),
@@ -107,7 +105,6 @@ public class Drivetrain extends SubsystemBase {
     leftEncoderSim = new EncoderSim(leftEncoder);
     rightEncoderSim = new EncoderSim(rightEncoder);
     gyroSim = new ADIS16448_IMUSim(gyro);
-
   }
 
   public void drive() {
@@ -191,21 +188,32 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
-    driveTrainSim.setInputs(
-      leftMotors[0].get() * RobotController.getInputVoltage(),
-      rightMotors[0].get() * RobotController.getInputVoltage()
+    double joystickX = joystick.getX();
+    double joystickY = joystick.getY();
+    if (Math.abs(joystickX) >= 0.01) {
+      driveTrainSim.setInputs(
+        joystickX * 0.5,
+        -joystickX * 0.5 
       );
+    }
+    if (Math.abs(joystickY) >= 0.01) {
+        driveTrainSim.setInputs(
+          -joystickY,
+          -joystickY 
+        );
+    }
+    
 
-      driveTrainSim.update(0.02);
-      
-      leftEncoderSim.setDistance(driveTrainSim.getLeftPositionMeters());
-      leftEncoderSim.setRate(driveTrainSim.getLeftVelocityMetersPerSecond());
-      rightEncoderSim.setDistance(driveTrainSim.getRightPositionMeters());
-      rightEncoderSim.setRate(driveTrainSim.getRightVelocityMetersPerSecond());
-      gyroSim.setGyroAngleZ(-driveTrainSim.getHeading().getDegrees());
-
-
-      field.setRobotPose(getPose());
+    robotPose.setPose(driveTrainSim.getPose());
+    field.setRobotPose(driveTrainSim.getPose());
+    SmartDashboard.putData(field);
+    driveTrainSim.update(0.02);
+    
+    leftEncoderSim.setDistance(driveTrainSim.getLeftPositionMeters());
+    leftEncoderSim.setRate(driveTrainSim.getLeftVelocityMetersPerSecond());
+    rightEncoderSim.setDistance(driveTrainSim.getRightPositionMeters());
+    rightEncoderSim.setRate(driveTrainSim.getRightVelocityMetersPerSecond());
+    gyroSim.setGyroAngleZ(-driveTrainSim.getHeading().getDegrees());
   }
 
 }

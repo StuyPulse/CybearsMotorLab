@@ -22,11 +22,11 @@ import edu.wpi.first.wpilibj.XboxController;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final Drivetrain m_Drivetrain = new Drivetrain();
+  // private final Drivetrain m_Drivetrain = new Drivetrain();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final Joystick joystick = new Joystick(0);
-  private final XboxController controller = new XboxController(0);
+  private final Joystick joystick = new Joystick(8);
+  private final XboxController controller = new XboxController(9);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

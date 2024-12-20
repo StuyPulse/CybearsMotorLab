@@ -20,7 +20,7 @@ public class Robot extends TimedRobot {
 
   private RobotContainer m_robotContainer;
 
-  private Joystick joystick = new Joystick(0);
+  //private Joystick joystick = new Joystick(0);
   private final Drivetrain drivetrain = new Drivetrain();
   
 
@@ -83,7 +83,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    drivetrain.drive();
+    // drivetrain.drive();
   }
   
 
