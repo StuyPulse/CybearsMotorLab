@@ -15,6 +15,9 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.Odometry;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N2;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.wpilibj.ADIS16448_IMU;
 import edu.wpi.first.wpilibj.Encoder;
@@ -25,7 +28,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Joystick;
 import frc.robot.Constants;
+
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
+import edu.wpi.first.wpilibj.simulation.EncoderSim;
+import edu.wpi.first.wpilibj.simulation.LinearSystemSim;
 
 
 public class Drivetrain extends SubsystemBase {
@@ -41,6 +49,16 @@ public class Drivetrain extends SubsystemBase {
   private final ADIS16448_IMU gyro;
   private final DifferentialDriveOdometry odometry;
   private final Field2d field;
+
+  //Sim stuff
+  private final DifferentialDrivetrainSim driveTrainSim;
+  private final EncoderSim leftEncoderSim;
+  private final EncoderSim rightEncoderSim;
+
+  private final LinearSystemSim<N2, N1, N2> driveSim;
+  private final LinearSystemSim<N2, N1, N1> turnSim;
+  
+  private final Joystick joystick;
 
   public Drivetrain() {
 
@@ -64,6 +82,8 @@ public class Drivetrain extends SubsystemBase {
     leftMotors[0].addFollower(leftMotors[1]);
     rightMotors[0].addFollower(rightMotors[1]);
 
+    joystick = new Joystick(0);
+
 
     driveTrain = new DifferentialDrive(leftMotors[0], rightMotors[0]);
     leftEncoder.setDistancePerPulse(Constants.Drivetrain.DISTANCE_PER_PULSE);
@@ -73,23 +93,31 @@ public class Drivetrain extends SubsystemBase {
     odometry = new DifferentialDriveOdometry(getRotation2d(), getLeftDistance(), getRightDistance()); //Idk if this is right
 
     field = new Field2d();
+
+    driveTrainSim = new DifferentialDrivetrainSim( // constant numbers are arbitrary
+      DCMotor.getNEO(2),
+      Constants.Drivetrain.GEAR_RATIO, 
+      10, //Intertia
+      50, //Weight KG 
+      Units.inchesToMeters(4), //Wheel Radus
+      Units.inchesToMeters(24), //Circumference
+      null
+    );
   
   }
 
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
+  public void drive() {
+    double speed = -joystick.getRawAxis(1) * 0.6;
+    double turn = joystick.getRawAxis(4) * 0.3;
 
+    double left = speed + turn;
+    double right = speed - turn;
 
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
+    leftMotors[0].set(left);
+    leftMotors[1].set(left);
+    
+    rightMotors[0].set(-right);
+    rightMotors[1].set(-right); 
   }
 
   //Encoder
@@ -152,7 +180,18 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
+    driveTrainSim.setInputs(
+      leftMotors[0].get() * 12, //Convert to voltage?
+      rightMotors[0].get() * 12
+    );
+
+    driveTrainSim.update(0.02);
+
+    leftEncoderSim.setDistance();
+    leftEncoderSim.setRate();
+
+    rightEncoderSim.setDistance();
+    rightEncoderSim.setRate();
   }
 
   public void arcadeDrive(double spd, double rot) {

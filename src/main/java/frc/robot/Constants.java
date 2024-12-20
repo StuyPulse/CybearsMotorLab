@@ -30,6 +30,7 @@ public final class Constants {
 
   public static class Drivetrain {
     public static int DISTANCE_PER_PULSE = 256; //Change
+    public static double GEAR_RATIO = 3.0;
   }
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
