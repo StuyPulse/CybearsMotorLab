@@ -43,13 +43,13 @@ import frc.robot.Constants;
 
 public class Drivetrain extends SubsystemBase {
 
-  // private final PWMSparkMax[] leftMotors;
-  // private final PWMSparkMax[] rightMotors;
+  private final PWMSparkMax[] leftMotors;
+  private final PWMSparkMax[] rightMotors;
 
   private final Encoder leftEncoder;
   private final Encoder rightEncoder;
 
-  // private final DifferentialDrive driveTrain;
+  private final DifferentialDrive driveTrain;
 
   private final ADIS16448_IMU gyro;
   private final DifferentialDriveOdometry odometry;
@@ -65,28 +65,28 @@ public class Drivetrain extends SubsystemBase {
 
   public Drivetrain() {
 
-    // leftMotors = new PWMSparkMax[] {
-    //   new PWMSparkMax(Constants.Ports.LEFT_TOP),
-    //   new PWMSparkMax(Constants.Ports.LEFT_BOTTOM)
-    // };
+    leftMotors = new PWMSparkMax[] {
+      new PWMSparkMax(Constants.Ports.LEFT_TOP),
+      new PWMSparkMax(Constants.Ports.LEFT_BOTTOM)
+    };
 
-    // rightMotors = new PWMSparkMax[] {
-    //   new PWMSparkMax(Constants.Ports.RIGHT_TOP),
-    //   new PWMSparkMax(Constants.Ports.RIGHT_BOTTOM)
-    // };
+    rightMotors = new PWMSparkMax[] {
+      new PWMSparkMax(Constants.Ports.RIGHT_TOP),
+      new PWMSparkMax(Constants.Ports.RIGHT_BOTTOM)
+    };
 
-    // rightMotors[0].setInverted(true);
-    // rightMotors[1].setInverted(true);
+    rightMotors[0].setInverted(true);
+    rightMotors[1].setInverted(true);
 
     leftEncoder = new Encoder(Constants.Ports.LEFT_A, Constants.Ports.LEFT_B);
     rightEncoder = new Encoder(Constants.Ports.RIGHT_A, Constants.Ports.RIGHT_B);
     
-    // leftMotors[0].addFollower(leftMotors[1]);
-    // rightMotors[0].addFollower(rightMotors[1]);
+    leftMotors[0].addFollower(leftMotors[1]);
+    rightMotors[0].addFollower(rightMotors[1]);
 
     joystick = new Joystick(0);
 
-    // driveTrain = new DifferentialDrive(leftMotors[0], rightMotors[0]);
+    driveTrain = new DifferentialDrive(leftMotors[0], rightMotors[0]);
     leftEncoder.setDistancePerPulse(Constants.Drivetrain.DISTANCE_PER_PULSE);
     rightEncoder.setDistancePerPulse(Constants.Drivetrain.DISTANCE_PER_PULSE);
 
@@ -117,11 +117,11 @@ public class Drivetrain extends SubsystemBase {
     double left = speed + turn;
     double right = speed - turn;
 
-    // leftMotors[0].set(left);
-    // leftMotors[1].set(left);
+    leftMotors[0].set(left);
+    leftMotors[1].set(left);
     
-    // rightMotors[0].set(-right);
-    // rightMotors[1].set(-right); 
+    rightMotors[0].set(-right);
+    rightMotors[1].set(-right); 
   }
 
   //Encoder
@@ -191,10 +191,10 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
-    // driveTrainSim.setInputs(
-    //   leftMotors[0].get() * RobotController.getInputVoltage(),
-    //   rightMotors[0].get() * RobotController.getInputVoltage()
-    //   );
+    driveTrainSim.setInputs(
+      leftMotors[0].get() * RobotController.getInputVoltage(),
+      rightMotors[0].get() * RobotController.getInputVoltage()
+      );
 
       driveTrainSim.update(0.02);
       
