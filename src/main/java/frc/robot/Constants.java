@@ -14,11 +14,11 @@ package frc.robot;
  */
 public final class Constants {
   public static class Ports {
-    public static int LEFT_TOP = 0;
-    public static int LEFT_BOTTOM = 0;
+    public static int LEFT_TOP = 4;
+    public static int LEFT_BOTTOM = 5;
 
-    public static int RIGHT_TOP = 0;
-    public static int RIGHT_BOTTOM = 0;
+    public static int RIGHT_TOP = 6;
+    public static int RIGHT_BOTTOM = 7;
 
     public static int LEFT_A = 0;
     public static int LEFT_B = 1;
@@ -31,8 +31,13 @@ public final class Constants {
   public static class Drivetrain {
     public static int DISTANCE_PER_PULSE = 256; //Change
     public static double GEAR_RATIO = 3.0;
+    public static double MASS = 50.0;
+    public static double WHEEL_RADIUS = 0.75;
+    public static double INERTIA = 2; // change
+
   }
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
+
 }
