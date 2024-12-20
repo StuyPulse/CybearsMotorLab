@@ -107,18 +107,8 @@ public class Drivetrain extends SubsystemBase {
     gyroSim = new ADIS16448_IMUSim(gyro);
   }
 
-  public void drive() {
-    double speed = -joystick.getRawAxis(1) * 0.6;
-    double turn = joystick.getRawAxis(4) * 0.3;
-
-    double left = speed + turn;
-    double right = speed - turn;
-
-    leftMotors[0].set(left);
-    leftMotors[1].set(left);
-    
-    rightMotors[0].set(-right);
-    rightMotors[1].set(-right); 
+  public void arcadeDrive(double fwd, double rot) {
+    driveTrain.arcadeDrive(fwd, rot);
   }
 
   //Encoder
