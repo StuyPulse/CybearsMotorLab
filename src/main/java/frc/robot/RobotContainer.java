@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.commands.CoolAuton;
 import frc.robot.commands.DriveForward;
 import frc.robot.commands.DriveHalfSpeed;
 import frc.robot.commands.StraightLineAuton;
@@ -60,6 +61,7 @@ public class RobotContainer {
   public void configureAutons() {
     autonChooser.addOption("Straight Line", new StraightLineAuton());
     autonChooser.addOption("Drive Forward Auton", new DriveForward(drivetrain, Constants.Drivetrain.autoSpeed));
+    autonChooser.addOption("Midline Sweep", new CoolAuton());
   }
 
   public Command getAutonomousCommand() {
