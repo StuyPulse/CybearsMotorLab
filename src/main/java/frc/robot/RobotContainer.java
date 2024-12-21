@@ -10,8 +10,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.commands.DriveForward;
+import frc.robot.commands.DriveHalfSpeed;
 import frc.robot.commands.StraightLineAuton;
 import frc.robot.Constants;
 
@@ -28,7 +31,7 @@ public class RobotContainer {
 
   private static SendableChooser<Command> autonChooser = new SendableChooser<>();
 
-  XboxController driverController = new XboxController(0);
+  private XboxController driverController = new XboxController(0);
 
   public RobotContainer() {
     configureButtonBindings();
@@ -46,6 +49,8 @@ public class RobotContainer {
 
   
   private void configureButtonBindings() {
+    new JoystickButton(driverController, XboxController.Button.kY.value)
+      .onTrue(new DriveHalfSpeed(drivetrain));
   }
 
   public Drivetrain getRobotDrive() {
