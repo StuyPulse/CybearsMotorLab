@@ -1,16 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
-
-/* TODO: 
- * Add Field2d related stuff
- * Check if we have all needed methods
- * Motor Config?
- * Drive Commands?
- */
-
-
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
