@@ -1,9 +1,12 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.ADIS16448_IMU;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
@@ -17,8 +20,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants;
-
 
 public class Drivetrain extends SubsystemBase {
 
@@ -91,6 +94,17 @@ public class Drivetrain extends SubsystemBase {
     gyroSim = new ADIS16448_IMUSim(gyro);
   }
 
+  public void drive() {
+    double speed = -joystick.getRawAxis(1) * 0.6;
+    double turn = joystick.getRawAxis(4) * 0.3;
+
+    double left = speed + turn;
+    double right = speed - turn;
+
+    leftMotors[0].set(left);
+    rightMotors[0].set(-right);
+  }
+
   public void arcadeDrive(double fwd, double rot) {
     driveTrain.arcadeDrive(fwd, rot);
   }
@@ -121,8 +135,18 @@ public class Drivetrain extends SubsystemBase {
     return rightEncoder.getRate();
   }
 
-  public double getVelocity() {
+  public double getVelocities() {
     return (getLeftVelocity() + getRightVelocity()) / 2.0;
+  }
+
+  public DifferentialDriveWheelSpeeds getWheelSpeeds() {
+    return new DifferentialDriveWheelSpeeds(getLeftVelocity(), getRightVelocity());
+  }
+
+  public void setVolts(double leftVolts, double rightVolts) {
+    double battery = RobotController.getBatteryVoltage();
+    leftMotors[0].set(leftVolts / battery);
+    rightMotors[0].set(rightVolts / battery); 
   }
 
   //Odometry
@@ -160,7 +184,7 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Debug/Drivetrain/Distance Traveled (m)", getDistance());
     SmartDashboard.putNumber("Debug/Drivetrain/Distance Traveled Left (m)", getLeftDistance());
     SmartDashboard.putNumber("Debug/Drivetrain/Distance Traveled Right (m)", getRightDistance());
-    SmartDashboard.putNumber("Debug/Drivetrain/Velocity (m per s)", getVelocity());
+    SmartDashboard.putNumber("Debug/Drivetrain/Robot Velocity (m per s)", getVelocities());
     SmartDashboard.putNumber("Debug/Drivetrain/Velocity Left (m per s)", getLeftVelocity());
     SmartDashboard.putNumber("Debug/Drivetrain/Velocity Right (m per s)", getRightVelocity());
   }
@@ -169,7 +193,7 @@ public class Drivetrain extends SubsystemBase {
   public void simulationPeriodic() {
     double joystickX = joystick.getX();
     double joystickY = joystick.getY();
-    if (Math.abs(joystickX) >= 0.01) {
+    if (Math.abs(joystickX) >= 0) {
       driveTrainSim.setInputs(
         joystickX * 0.5,
         -joystickX * 0.5 

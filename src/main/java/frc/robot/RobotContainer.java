@@ -5,12 +5,14 @@
 
 package frc.robot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.commands.DriveForward;
+import frc.robot.commands.StraightLineAuton;
 import frc.robot.Constants;
 
 
@@ -20,27 +22,26 @@ import frc.robot.Constants;
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
+
 public class RobotContainer {
-  private final Drivetrain m_robotDrive = new Drivetrain();
+  private final Drivetrain drivetrain = new Drivetrain();
 
-  // The driver's controller
-  XboxController driverController =
-      new XboxController(0);
+  private static SendableChooser<Command> autonChooser = new SendableChooser<>();
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  XboxController driverController = new XboxController(0);
+
   public RobotContainer() {
-    // Configure the button bindings
     configureButtonBindings();
+    configureAutons();
 
-    // Configure default commands
     // Set the default drive command to split-stick arcade drive
-    m_robotDrive.setDefaultCommand(
-       
+    drivetrain.setDefaultCommand(
         new RunCommand(
-            () ->
-                m_robotDrive.arcadeDrive(
-                    -driverController.getLeftY(), -driverController.getLeftX()*0.65),
-            m_robotDrive));
+          () ->
+              drivetrain.arcadeDrive(-driverController.getLeftY(), -driverController.getLeftX()*0.65),
+              drivetrain
+              )
+    );
   }
 
   
@@ -48,11 +49,15 @@ public class RobotContainer {
   }
 
   public Drivetrain getRobotDrive() {
-    return m_robotDrive;
+    return drivetrain;
+  }
+
+  public void configureAutons() {
+    autonChooser.addOption("Straight Line", new StraightLineAuton());
+    autonChooser.addOption("Drive Forward Auton", new DriveForward(drivetrain, Constants.Drivetrain.autoSpeed));
   }
 
   public Command getAutonomousCommand() {
-        return new DriveForward(m_robotDrive, Constants.Drivetrain.autoSpeed);
-    }
-
+    return autonChooser.getSelected();
+}
 }
