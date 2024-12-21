@@ -54,14 +54,15 @@ public class Drivetrain extends SubsystemBase {
       new PWMSparkMax(Constants.Ports.RIGHT_BOTTOM)
     };
 
-    rightMotors[0].setInverted(true);
-    rightMotors[1].setInverted(true);
-
     leftEncoder = new Encoder(Constants.Ports.LEFT_A, Constants.Ports.LEFT_B);
     rightEncoder = new Encoder(Constants.Ports.RIGHT_A, Constants.Ports.RIGHT_B);
     
     leftMotors[0].addFollower(leftMotors[1]);
     rightMotors[0].addFollower(rightMotors[1]);
+
+    // the motor controller for rightMotors[1] follows that of rightMotors[0],
+    // so it will also invert
+    rightMotors[0].setInverted(true);
 
     joystick = new Joystick(0);
 
@@ -92,6 +93,11 @@ public class Drivetrain extends SubsystemBase {
 
   public void arcadeDrive(double fwd, double rot) {
     driveTrain.arcadeDrive(fwd, rot);
+  }
+
+  public void setMotors(double leftSpeed, double rightSpeed) {
+    leftMotors[0].set(leftSpeed);
+    rightMotors[0].set(-rightSpeed);
   }
 
   //Encoder

@@ -35,9 +35,7 @@ public final class Constants {
     public static double WHEEL_RADIUS = 0.75;
     public static double INERTIA = 2; // change
 
-  }
-  public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
+    public static double autoSpeed = 1;
   }
 
 }
