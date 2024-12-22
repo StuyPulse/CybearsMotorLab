@@ -10,7 +10,7 @@ public class DriveForward extends Command {
 
     public DriveForward(Drivetrain driveSubsystem, double distance) {
         this.driveSubsystem = driveSubsystem;
-        this.distance = driveSubsystem.getDistance();
+        this.distance = driveSubsystem.getDistance() + distance;
         addRequirements(driveSubsystem);
     }
 
