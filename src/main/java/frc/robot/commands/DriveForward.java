@@ -9,9 +9,13 @@ public class DriveForward extends Command {
     private final double distance;
 
     public DriveForward(Drivetrain driveSubsystem, double distance) {
-        this.driveSubsystem = driveSubsystem;
-        this.distance = driveSubsystem.getDistance();
-        addRequirements(driveSubsystem);
+        // Instantiate driveSubsystem here
+
+        // We add distance to getDistance() because we want to terminate when the encoders' getDistance()
+        // increases by "distance" amount- this would mean the wheels have traveled "distance" units
+        this.distance = driveSubsystem.getDistance() + distance;
+        
+        // addRequirements() here
     }
 
     @Override
@@ -21,17 +25,19 @@ public class DriveForward extends Command {
 
     @Override
     public void execute() {
-        driveSubsystem.setMotors(Constants.Drivetrain.autoSpeed, Constants.Drivetrain.autoSpeed);
+        // What would the speeds be for the right motors?
+        driveSubsystem.setMotors(Constants.Drivetrain.autoSpeed, );
     }
 
+    
     @Override
     public void end(boolean interrupted) {
-        driveSubsystem.setMotors(0, 0);
+        // set the motor speeds to 0 here
         System.out.println("DriveForward Command ended!");
     }
 
     @Override
     public boolean isFinished() {
-        return (driveSubsystem.getDistance() > distance);
+        return driveSubsystem.getDistance() > distance;
     }
 }

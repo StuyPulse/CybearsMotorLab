@@ -48,10 +48,10 @@ public class RobotContainer {
     );
   }
 
-  
+  // code a new JoystickButton with arguements of driverController and 
+  // XboxController.Button.something something
   private void configureButtonBindings() {
-    new JoystickButton(driverController, XboxController.Button.kY.value)
-      .onTrue(new DriveHalfSpeed(drivetrain));
+
   }
 
   public Drivetrain getRobotDrive() {
@@ -60,11 +60,11 @@ public class RobotContainer {
 
   public void configureAutons() {
     autonChooser.addOption("Straight Line", new StraightLineAuton());
-    autonChooser.addOption("Drive Forward Auton", new DriveForward(drivetrain, Constants.Drivetrain.autoSpeed));
+    autonChooser.addOption("Drive Forward Auton", new DriveForward(drivetrain, 10));
     autonChooser.addOption("Midline Sweep", new CoolAuton());
   }
 
   public Command getAutonomousCommand() {
     return autonChooser.getSelected();
-}
+  }
 }
