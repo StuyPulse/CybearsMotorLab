@@ -9,8 +9,8 @@ public class CoolAuton extends SequentialCommandGroup {
     Drivetrain drivetrain;
     Trajectory trajectory;
 
-    public CoolAuton() {
-        drivetrain = new Drivetrain();
+    public CoolAuton(Drivetrain drivetrain) {
+        this.drivetrain = drivetrain;
         trajectory = TrajectoryLoader.getTrajectory("./output/CoolAuton.wpilib.json");
         addCommands(new DrivetrainRamsete(drivetrain, trajectory));
     }

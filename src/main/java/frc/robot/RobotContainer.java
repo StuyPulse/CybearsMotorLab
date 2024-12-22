@@ -59,9 +59,9 @@ public class RobotContainer {
   }
 
   public void configureAutons() {
-    autonChooser.addOption("Straight Line", new StraightLineAuton());
-    autonChooser.addOption("Drive Forward Auton", new DriveForward(drivetrain, Constants.Drivetrain.autoSpeed));
-    autonChooser.addOption("Midline Sweep", new CoolAuton());
+    autonChooser.addOption("Straight Line", new StraightLineAuton(drivetrain));
+    autonChooser.addOption("Drive Forward Auton", new DriveForward(drivetrain, 10));
+    autonChooser.addOption("Midline Sweep", new CoolAuton(drivetrain));
   }
 
   public Command getAutonomousCommand() {

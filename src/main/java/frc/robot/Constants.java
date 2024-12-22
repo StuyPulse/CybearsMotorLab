@@ -33,9 +33,9 @@ public final class Constants {
     public static double GEAR_RATIO = 3.0;
     public static double MASS = 50.0;
     public static double WHEEL_RADIUS = 0.75;
-    public static double INERTIA = 2; // change
+    public static double INERTIA = 2.0; // change
 
-    public static double autoSpeed = 1;
+    public static double autoSpeed = 1.0;
   }
 
 }
