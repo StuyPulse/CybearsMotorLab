@@ -11,7 +11,7 @@ public class CoolAuton extends SequentialCommandGroup {
 
     public CoolAuton(Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
-        trajectory = TrajectoryLoader.getTrajectory("./deploy/output/CoolAuton.wpilib.json");
+        trajectory = TrajectoryLoader.getTrajectory("./output/CoolAuton.wpilib.json");
         addCommands(new DrivetrainRamsete(drivetrain, trajectory));
     }
 }
