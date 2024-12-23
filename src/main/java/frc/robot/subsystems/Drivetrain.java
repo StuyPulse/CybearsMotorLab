@@ -111,7 +111,7 @@ public class Drivetrain extends SubsystemBase {
 
   public void setMotors(double leftSpeed, double rightSpeed) {
     leftMotors[0].set(leftSpeed);
-    rightMotors[0].set(-rightSpeed);
+    rightMotors[0].set(rightSpeed);
   }
 
   //Encoder
