@@ -11,7 +11,7 @@ public class StraightLineAuton extends SequentialCommandGroup {
 
     public StraightLineAuton(Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
-        trajectory = TrajectoryLoader.getTrajectory("./output/BasicAuton.wpilib.json");
+        trajectory = TrajectoryLoader.getTrajectory("./deploy/output/BasicAuton.wpilib.json");
         addCommands(new DrivetrainRamsete(drivetrain, trajectory));
     }
 }
