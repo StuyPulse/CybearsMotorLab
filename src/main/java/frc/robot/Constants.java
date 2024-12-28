@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.config.RobotConfig;
+
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -36,6 +38,9 @@ public final class Constants {
     public static double MASS = 50.0;
     public static double WHEEL_RADIUS = 0.75;
     public static double INERTIA = 2.0; // change
+    public static double TRACK_WIDTH = 28.0; // change
+
+    public static RobotConfig config;
 
     public static double autoSpeed = 1.0;
   }

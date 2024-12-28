@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -16,14 +17,25 @@ import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPLTVController;
+
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 
 public class Drivetrain extends SubsystemBase {
+
 
   private final PWMSparkMax[] leftMotors;
   private final PWMSparkMax[] rightMotors;
@@ -37,6 +49,11 @@ public class Drivetrain extends SubsystemBase {
   private final DifferentialDriveOdometry odometry;
   private final Field2d field;
   private final FieldObject2d robotPose;
+  private final DifferentialDriveKinematics kinematics;
+
+  private final SimpleMotorFeedforward m_feedforward;
+  private final PIDController m_leftPIDController;
+  private final PIDController m_rightPIDController;
 
   private final DifferentialDrivetrainSim driveTrainSim;
   private final EncoderSim leftEncoderSim;
@@ -73,12 +90,47 @@ public class Drivetrain extends SubsystemBase {
     leftEncoder.setDistancePerPulse(Constants.Drivetrain.DISTANCE_PER_PULSE);
     rightEncoder.setDistancePerPulse(Constants.Drivetrain.DISTANCE_PER_PULSE);
 
+    kinematics = new DifferentialDriveKinematics(Constants.Drivetrain.TRACK_WIDTH);
+
     gyro = new ADIS16448_IMU();
     odometry = new DifferentialDriveOdometry(getRotation2d(), getLeftDistance(), getRightDistance()); //Idk if this is right
 
     field = new Field2d();
     SmartDashboard.putData("Field", field);
     robotPose = field.getObject("Robot Pose");
+
+    // Example constants, must be empirically determined
+    m_feedforward = new SimpleMotorFeedforward(1, 3);
+    m_leftPIDController = new PIDController(1, 0, 0);
+    m_rightPIDController = new PIDController(1, 0, 0);
+
+    try{
+      Constants.Drivetrain.config = RobotConfig.fromGUISettings();
+    } catch (Exception e) {
+      // Handle exception as needed
+      e.printStackTrace();
+    }
+
+    AutoBuilder.configure(
+            this::getPose, // Robot pose supplier
+            this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
+            this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+            new PPLTVController(0.02), // PPLTVController is the built in path following controller for differential drive trains
+            Constants.Drivetrain.config, // The robot configuration
+            () -> {
+              // Boolean supplier that controls when the path will be mirrored for the red alliance
+              // This will flip the path being followed to the red side of the field.
+              // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+              var alliance = DriverStation.getAlliance();
+              if (alliance.isPresent()) {
+                return alliance.get() == DriverStation.Alliance.Red;
+              }
+              return false;
+            },
+            this // Reference to this subsystem to set requirements
+    );
 
     driveTrainSim = new DifferentialDrivetrainSim(
       DCMotor.getNEO(2),
@@ -92,6 +144,38 @@ public class Drivetrain extends SubsystemBase {
     leftEncoderSim = new EncoderSim(leftEncoder);
     rightEncoderSim = new EncoderSim(rightEncoder);
     gyroSim = new ADIS16448_IMUSim(gyro);
+  }
+
+  public void resetPose(Pose2d pose) {
+    odometry.resetPosition(getGyroAngle(), getWheelPositions(), pose);
+  }
+ 
+  public Rotation2d getGyroAngle() {
+    return Rotation2d.fromDegrees((gyro.getAngle()));
+  }
+
+  public DifferentialDriveWheelPositions getWheelPositions() {
+    return new DifferentialDriveWheelPositions(leftEncoder.getDistance(), rightEncoder.getDistance());
+   }
+
+  public ChassisSpeeds getRobotRelativeSpeeds() {
+    return kinematics.toChassisSpeeds(getWheelSpeeds());
+  }
+
+  public void setSpeeds(DifferentialDriveWheelSpeeds speeds) {
+    final double leftFeedforward = m_feedforward.calculate(speeds.leftMetersPerSecond);
+    final double rightFeedforward = m_feedforward.calculate(speeds.rightMetersPerSecond);
+
+    final double leftOutput =
+        m_leftPIDController.calculate(leftEncoder.getRate(), speeds.leftMetersPerSecond);
+    final double rightOutput =
+        m_rightPIDController.calculate(rightEncoder.getRate(), speeds.rightMetersPerSecond);
+    leftMotors[0].setVoltage(leftOutput + leftFeedforward);
+    rightMotors[0].setVoltage(rightOutput + rightFeedforward);
+  }
+
+  public void driveRobotRelative(ChassisSpeeds speeds) {
+    setSpeeds(kinematics.toWheelSpeeds(speeds));
   }
 
   public void drive() {
@@ -173,13 +257,17 @@ public class Drivetrain extends SubsystemBase {
     );
   }
 
-  @Override
-  public void periodic() {
+  public void updateOdometry() {
     odometry.update(
       Rotation2d.fromDegrees(getHeading()),
       leftEncoder.getDistance(),
       rightEncoder.getDistance()
     );
+  }
+
+  @Override
+  public void periodic() {
+    updateOdometry();
 
     SmartDashboard.putNumber("Debug/Drivetrain/Distance Traveled (m)", getDistance());
     SmartDashboard.putNumber("Debug/Drivetrain/Distance Traveled Left (m)", getLeftDistance());
