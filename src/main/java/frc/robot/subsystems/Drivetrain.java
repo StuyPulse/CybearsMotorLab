@@ -1,9 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
-import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.ADIS16448_IMU;
@@ -21,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPLTVController;
@@ -120,27 +117,6 @@ public class Drivetrain extends SubsystemBase {
       System.exit(1);
     }
 
-    AutoBuilder.configure(
-            this::getPose, // Robot pose supplier
-            this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-            this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-            new PPLTVController(0.02), // PPLTVController is the built in path following controller for differential drive trains
-            Constants.Drivetrain.config, // The robot configuration
-            () -> {
-              // Boolean supplier that controls when the path will be mirrored for the red alliance
-              // This will flip the path being followed to the red side of the field.
-              // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-              var alliance = DriverStation.getAlliance();
-              if (alliance.isPresent()) {
-                return alliance.get() == DriverStation.Alliance.Red;
-              }
-              return false;
-            },
-            this // Reference to this subsystem to set requirements
-    );
-
     driveTrainSim = new DifferentialDrivetrainSim(
       DCMotor.getNEO(2),
       Constants.Drivetrain.GEAR_RATIO,
@@ -155,39 +131,11 @@ public class Drivetrain extends SubsystemBase {
     gyroSim = new ADIS16448_IMUSim(gyro);
   }
 
-  public void resetPose(Pose2d pose) {
-    odometry.resetPosition(getGyroAngle(), getWheelPositions(), pose);
-  }
- 
-  public Rotation2d getGyroAngle() {
-    return Rotation2d.fromDegrees((gyro.getAngle()));
+  public void arcadeDrive(double fwd, double rot) {
+    driveTrain.arcadeDrive(fwd, rot);
   }
 
-  public DifferentialDriveWheelPositions getWheelPositions() {
-    return new DifferentialDriveWheelPositions(leftEncoder.getDistance(), rightEncoder.getDistance());
-   }
-
-  public ChassisSpeeds getRobotRelativeSpeeds() {
-    return kinematics.toChassisSpeeds(getWheelSpeeds());
-  }
-
-  public void setSpeeds(DifferentialDriveWheelSpeeds speeds) {
-    final double leftFeedforward = m_feedforward.calculate(speeds.leftMetersPerSecond);
-    final double rightFeedforward = m_feedforward.calculate(speeds.rightMetersPerSecond);
-
-    final double leftOutput =
-        m_leftPIDController.calculate(leftEncoder.getRate(), speeds.leftMetersPerSecond);
-    final double rightOutput =
-        m_rightPIDController.calculate(rightEncoder.getRate(), speeds.rightMetersPerSecond);
-    leftMotors[0].setVoltage(leftOutput + leftFeedforward);
-    rightMotors[0].setVoltage(rightOutput + rightFeedforward);
-  }
-
-  public void driveRobotRelative(ChassisSpeeds speeds) {
-    setSpeeds(kinematics.toWheelSpeeds(speeds));
-  }
-
-  public void drive() {
+    public void drive() {
     double speed = -joystick.getRawAxis(1) * 0.6;
     double turn = joystick.getRawAxis(4) * 0.3;
 
@@ -196,10 +144,6 @@ public class Drivetrain extends SubsystemBase {
 
     leftMotors[0].set(left);
     rightMotors[0].set(-right);
-  }
-
-  public void arcadeDrive(double fwd, double rot) {
-    driveTrain.arcadeDrive(fwd, rot);
   }
 
   public void setMotors(double leftSpeed, double rightSpeed) {
@@ -232,46 +176,10 @@ public class Drivetrain extends SubsystemBase {
     return (getLeftVelocity() + getRightVelocity()) / 2.0;
   }
 
-  public DifferentialDriveWheelSpeeds getWheelSpeeds() {
-    return new DifferentialDriveWheelSpeeds(getLeftVelocity(), getRightVelocity());
-  }
-
   public void setVolts(double leftVolts, double rightVolts) {
     double battery = RobotController.getBatteryVoltage();
     leftMotors[0].set(leftVolts / battery);
     rightMotors[0].set(rightVolts / battery); 
-  }
-
-  //Odometry
-  public double getHeading() {
-    return Math.IEEEremainder(gyro.getAngle(), 360);
-  }
-
-  public Pose2d getPose() {
-    return odometry.getPoseMeters();
-  }
-
-  public Rotation2d getRotation2d() {
-    return Rotation2d.fromDegrees(getHeading());
-  }
-
-  public void resetOdometry(Pose2d pose) {
-    leftEncoder.reset();
-    rightEncoder.reset();
-    odometry.resetPosition(
-      Rotation2d.fromDegrees(getHeading()),
-      leftEncoder.getDistance(),
-      rightEncoder.getDistance(),
-      pose
-    );
-  }
-
-  public void updateOdometry() {
-    odometry.update(
-      Rotation2d.fromDegrees(getHeading()),
-      leftEncoder.getDistance(),
-      rightEncoder.getDistance()
-    );
   }
 
   public Command followPathCommand(String pathName) {
@@ -302,6 +210,66 @@ public class Drivetrain extends SubsystemBase {
         DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
         return Commands.none();
     }
+  }
+
+  public ChassisSpeeds getRobotRelativeSpeeds() {
+    return kinematics.toChassisSpeeds(getWheelSpeeds());
+  }
+
+  public DifferentialDriveWheelSpeeds getWheelSpeeds() {
+    return new DifferentialDriveWheelSpeeds(getLeftVelocity(), getRightVelocity());
+  }
+
+  public void setSpeeds(DifferentialDriveWheelSpeeds speeds) {
+    final double leftFeedforward = m_feedforward.calculate(speeds.leftMetersPerSecond);
+    final double rightFeedforward = m_feedforward.calculate(speeds.rightMetersPerSecond);
+
+    final double leftOutput =
+        m_leftPIDController.calculate(leftEncoder.getRate(), speeds.leftMetersPerSecond);
+    final double rightOutput =
+        m_rightPIDController.calculate(rightEncoder.getRate(), speeds.rightMetersPerSecond);
+    leftMotors[0].setVoltage(leftOutput + leftFeedforward);
+    rightMotors[0].setVoltage(rightOutput + rightFeedforward);
+  }
+
+  public void driveRobotRelative(ChassisSpeeds speeds) {
+    setSpeeds(kinematics.toWheelSpeeds(speeds));
+  }
+
+  //Odometry
+  public double getHeading() {
+    return Math.IEEEremainder(gyro.getAngle(), 360);
+  }
+
+  public Pose2d getPose() {
+    return odometry.getPoseMeters();
+  }
+
+  public Rotation2d getRotation2d() {
+    return Rotation2d.fromDegrees(getHeading());
+  }
+ 
+  public Rotation2d getGyroAngle() {
+    return Rotation2d.fromDegrees((gyro.getAngle()));
+  }
+
+  public void resetOdometry(Pose2d pose) {
+    leftEncoder.reset();
+    rightEncoder.reset();
+    odometry.resetPosition(
+      Rotation2d.fromDegrees(getHeading()),
+      leftEncoder.getDistance(),
+      rightEncoder.getDistance(),
+      pose
+    );
+  }
+
+  public void updateOdometry() {
+    odometry.update(
+      Rotation2d.fromDegrees(getHeading()),
+      leftEncoder.getDistance(),
+      rightEncoder.getDistance()
+    );
   }
 
   @Override
