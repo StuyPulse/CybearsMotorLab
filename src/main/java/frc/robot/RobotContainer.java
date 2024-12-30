@@ -63,7 +63,8 @@ public class RobotContainer {
     autonChooser.addOption("Drive Forward Auton", new DriveForward(drivetrain, 10));
     autonChooser.addOption("Midline Sweep", new CoolAuton(drivetrain));
     
-    autonChooser.addOption("AD (Amp)", drivetrain.followPathCommand("./pathplanner/autos/AD (Amp).auto"));
+    // fill in the second argument; use the path "./pathplanner/autos/AD (Amp).auto"
+    autonChooser.addOption("AD (Amp)", );
   }
 
   public Command getAutonomousCommand() {

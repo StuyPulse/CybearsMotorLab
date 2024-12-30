@@ -54,11 +54,12 @@ public class Drivetrain extends SubsystemBase {
   private final DifferentialDriveOdometry odometry;
   private final Field2d field;
   private final FieldObject2d robotPose;
-  private final DifferentialDriveKinematics kinematics;
 
+  private final DifferentialDriveKinematics kinematics;
+  
   private final SimpleMotorFeedforward m_feedforward;
   private final PIDController m_leftPIDController;
-  private final PIDController m_rightPIDController;
+  // Declare the rightPIDController here
 
   private final DifferentialDrivetrainSim driveTrainSim;
   private final EncoderSim leftEncoderSim;
@@ -85,8 +86,6 @@ public class Drivetrain extends SubsystemBase {
     leftMotors[0].addFollower(leftMotors[1]);
     rightMotors[0].addFollower(rightMotors[1]);
 
-    // the motor controller for rightMotors[1] follows that of rightMotors[0],
-    // so it will also invert
     rightMotors[0].setInverted(true);
 
     joystick = new Joystick(0);
@@ -107,12 +106,12 @@ public class Drivetrain extends SubsystemBase {
     // Example constants, must be empirically determined
     m_feedforward = new SimpleMotorFeedforward(1, 3);
     m_leftPIDController = new PIDController(1, 0, 0);
-    m_rightPIDController = new PIDController(1, 0, 0);
+    // instantiate the right PIDController here with the same constants as the left PIDController
 
     try{
-      Constants.Drivetrain.config = RobotConfig.fromGUISettings();
+      // To configure the robot, what constant do we set this to?
+       = RobotConfig.fromGUISettings();
     } catch (Exception e) {
-      // Handle exception as needed
       e.printStackTrace();
       System.exit(1);
     }
@@ -151,7 +150,7 @@ public class Drivetrain extends SubsystemBase {
     rightMotors[0].set(rightSpeed);
   }
 
-  //Encoder
+  //Encoders
   public double getLeftDistance() {
     return leftEncoder.getDistance();
   }
@@ -183,29 +182,31 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Command followPathCommand(String pathName) {
+    // the try-catch block here ensures the code doesn't crash without an appropriate error msg
     try{
-        PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+    //Path
+      PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
 
-        return new FollowPathCommand(
-                path,
-                this::getPose, // Robot pose supplier
-                this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds, AND feedforwards
-                new PPLTVController(0.02), // PPLTVController is the built in path following controller for differential drive trains
-                Constants.Drivetrain.config, // The robot configuration
-                () -> {
-                  // Boolean supplier that controls when the path will be mirrored for the red alliance
-                  // This will flip the path being followed to the red side of the field.
-                  // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+      return new FollowPathCommand(
+        path,
+        this::getPose, // Robot pose supplier
+        this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+        (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds, AND feedforwards
+        new PPLTVController(0.02), // PPLTVController is the built in path following controller for differential drive trains
+        Constants.Drivetrain.config, // The robot configuration
+        () -> {
+          // Boolean supplier that controls when the path will be mirrored for the red alliance
+          // This will flip the path being followed to the red side of the field.
+          // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-                  var alliance = DriverStation.getAlliance();
-                  if (alliance.isPresent()) {
-                    return alliance.get() == DriverStation.Alliance.Red;
-                  }
-                  return false;
-                },
-                this // Reference to this subsystem to set requirements
-        );
+          var alliance = DriverStation.getAlliance();
+          if (alliance.isPresent()) {
+            return alliance.get() == DriverStation.Alliance.Red;
+          }
+          return false;
+        },
+          this // Reference to this subsystem to set requirements
+      );
     } catch (Exception e) {
         DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
         return Commands.none();
@@ -213,23 +214,25 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public ChassisSpeeds getRobotRelativeSpeeds() {
-    return kinematics.toChassisSpeeds(getWheelSpeeds());
+    // fill in the argument required here using another method
+    return kinematics.toChassisSpeeds();
   }
 
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
-    return new DifferentialDriveWheelSpeeds(getLeftVelocity(), getRightVelocity());
+    // fill in the second argument
+    return new DifferentialDriveWheelSpeeds(getLeftVelocity(), );
   }
 
   public void setSpeeds(DifferentialDriveWheelSpeeds speeds) {
     final double leftFeedforward = m_feedforward.calculate(speeds.leftMetersPerSecond);
-    final double rightFeedforward = m_feedforward.calculate(speeds.rightMetersPerSecond);
+    // Code rightFeedforward
 
     final double leftOutput =
         m_leftPIDController.calculate(leftEncoder.getRate(), speeds.leftMetersPerSecond);
-    final double rightOutput =
-        m_rightPIDController.calculate(rightEncoder.getRate(), speeds.rightMetersPerSecond);
+    // Code the rightOutput as well
     leftMotors[0].setVoltage(leftOutput + leftFeedforward);
-    rightMotors[0].setVoltage(rightOutput + rightFeedforward);
+    // Set voltage for rightMotors[0]
+    
   }
 
   public void driveRobotRelative(ChassisSpeeds speeds) {
@@ -242,7 +245,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Pose2d getPose() {
-    return odometry.getPoseMeters();
+    // return the pose in meters from odometry
   }
 
   public Rotation2d getRotation2d() {
