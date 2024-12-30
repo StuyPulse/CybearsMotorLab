@@ -28,7 +28,7 @@ import frc.robot.Constants;
  */
 
 public class RobotContainer {
-  private final Drivetrain drivetrain = new Drivetrain();
+  private final Drivetrain drivetrain = Drivetrain.getInstance();
 
   private static SendableChooser<Command> autonChooser = new SendableChooser<>();
 
@@ -62,6 +62,8 @@ public class RobotContainer {
     autonChooser.addOption("Straight Line", new StraightLineAuton(drivetrain));
     autonChooser.addOption("Drive Forward Auton", new DriveForward(drivetrain, 10));
     autonChooser.addOption("Midline Sweep", new CoolAuton(drivetrain));
+    
+    autonChooser.addOption("AD (Amp)", drivetrain.followPathCommand("./pathplanner/autos/AD (Amp).auto"));
   }
 
   public Command getAutonomousCommand() {
